@@ -51,7 +51,7 @@ public class UpdateHandler
 
     private void CallbackQueryHandler(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
-        var callbackQuery = new CallbackQuery();
+        var callbackQuery = update.CallbackQuery;
         var user = callbackQuery?.From;
         var chat = callbackQuery?.Message?.Chat;
 
