@@ -1,7 +1,9 @@
+using BattleBot.Core;
+using BattleBot.DataBase;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
+using AppContext = BattleBot.DataBase.AppContext;
 
 namespace BattleBot;
 
@@ -14,10 +16,10 @@ public class UpdateHandler
             switch (update.Type)
             {
                 case UpdateType.Message:
-                    MessageHandler(botClient, update, cancellationToken);
+                    MessageHandler(update, cancellationToken);
                     return Task.CompletedTask;
                 case UpdateType.CallbackQuery:
-                    CallbackQueryHandler(botClient, update, cancellationToken);
+                    CallbackQueryHandler(update, cancellationToken);
                     return Task.CompletedTask;
             }
         }
@@ -30,26 +32,26 @@ public class UpdateHandler
         return Task.CompletedTask;
     }
 
-    private void MessageHandler(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+    private async void MessageHandler(Update update, CancellationToken cancellationToken)
     {
         var message = update.Message;
         var user = message?.From;
         var chat = message?.Chat;
-
         Console.WriteLine($"User [{user?.Username}]: \"{message?.Text}\"");
                     
-        if (message is not null && chat is not null && message.Text!.StartsWith("/"))
+        if (message is not null && chat is not null && user is not null 
+            && message.Text!.StartsWith($"/"))
         {
             switch (message.Text)
             {
                 case "/start":
-                    HandleStartCommand(botClient, chat);
+                    await Commands.Start(user, chat);
                     break;
             }
         }
     }
 
-    private void CallbackQueryHandler(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+    private async void CallbackQueryHandler(Update update, CancellationToken cancellationToken)
     {
         var callbackQuery = update.CallbackQuery;
         var user = callbackQuery?.From;
@@ -59,22 +61,20 @@ public class UpdateHandler
         {
             case "battleButton":
                 break;
-        }
-    }
-    
-    private void HandleStartCommand(ITelegramBotClient botClient, Chat chat)
-    {
-        var inlineKeyboard = new InlineKeyboardMarkup(
-            new List<InlineKeyboardButton[]>()
-            {
-                // Каждый новый массив - это дополнительные строки,
-                // а каждая дополнительная строка (кнопка) в массиве - это добавление ряда
-                new InlineKeyboardButton[]
+            case "CreateUnitButton":
+                if (user is not null)
                 {
-                    InlineKeyboardButton.WithCallbackData("Создать профиль.", "battleButton")
+                    Unit unit;
+                    unit = await UnitService.Create(user);
+                    var userTelegram = Program.Context.Users
+                        .FirstOrDefault(u => u != null && u.Login == user.Username);
+                    if (userTelegram != null) unit.MasterId = userTelegram.Id;
+                    
+                    Program.Context.Units.Add(unit);
+                    await Program.Context.SaveChangesAsync(cancellationToken);
                 }
-            });
 
-        botClient.SendTextMessageAsync(chat.Id, "Добро пожаловать!", replyMarkup: inlineKeyboard);
+                break;
+        }
     }
 }

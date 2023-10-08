@@ -14,7 +14,7 @@ using AppContext = BattleBot.DataBase.AppContext;
 namespace BattleBot.Migrations
 {
     [DbContext(typeof(AppContext))]
-    [Migration("20231007183706_Initial")]
+    [Migration("20231008004419_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -35,15 +35,15 @@ namespace BattleBot.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<List<long>>("Allies")
+                    b.Property<IEnumerable<long>>("Allies")
                         .IsRequired()
                         .HasColumnType("bigint[]");
 
-                    b.Property<List<string>>("BattleLog")
+                    b.Property<IEnumerable<string>>("BattleLog")
                         .IsRequired()
                         .HasColumnType("text[]");
 
-                    b.Property<List<long>>("Enemies")
+                    b.Property<IEnumerable<long>>("Enemies")
                         .IsRequired()
                         .HasColumnType("bigint[]");
 
@@ -84,7 +84,7 @@ namespace BattleBot.Migrations
                     b.ToTable("Units");
                 });
 
-            modelBuilder.Entity("BattleBot.DataBase.User", b =>
+            modelBuilder.Entity("BattleBot.DataBase.UserTelegram", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -98,7 +98,7 @@ namespace BattleBot.Migrations
                     b.Property<DateTime>("LastDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Login")
                         .IsRequired()
                         .HasColumnType("text");
 

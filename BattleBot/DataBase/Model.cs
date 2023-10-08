@@ -4,18 +4,18 @@ namespace BattleBot.DataBase
 {
 	public class AppContext : DbContext
 	{
-		private DbSet<User> Users { get; set; }
-		private DbSet<Unit> Units { get; set; }
-		private DbSet<BattleSession> BattleSessions { get; set; }
+		public DbSet<UserTelegram?> Users { get; set; }
+		public DbSet<Unit> Units { get; set; }
+		public DbSet<BattleSession> BattleSessions { get; set; }
 		
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 			=> optionsBuilder.UseNpgsql("Host=localhost;Database=db_battle_log_bot;Username=admin;Password=root");
 	}
 	
-	public class User
+	public class UserTelegram
 	{
 		public long Id { get; set; }
-		public string Name { get; set; }
+		public string Login { get; set; }
 		public DateTime EnterDate { get; set; }
 		public DateTime LastDate { get; set; }
 		public ETypeProfile TypeProfile { get; set; }
@@ -41,7 +41,7 @@ namespace BattleBot.DataBase
 	
 	public enum ETypeProfile
 	{
-		Player,
+		Default,
 		GameMaster
 	}
 }

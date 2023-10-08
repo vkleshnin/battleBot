@@ -20,9 +20,9 @@ namespace BattleBot.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     StartTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Enemies = table.Column<List<long>>(type: "bigint[]", nullable: false),
-                    Allies = table.Column<List<long>>(type: "bigint[]", nullable: false),
-                    BattleLog = table.Column<List<string>>(type: "text[]", nullable: false)
+                    Enemies = table.Column<IEnumerable<long>>(type: "bigint[]", nullable: false),
+                    Allies = table.Column<IEnumerable<long>>(type: "bigint[]", nullable: false),
+                    BattleLog = table.Column<IEnumerable<string>>(type: "text[]", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -52,7 +52,7 @@ namespace BattleBot.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
+                    Login = table.Column<string>(type: "text", nullable: false),
                     EnterDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     LastDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     TypeProfile = table.Column<int>(type: "integer", nullable: false)
