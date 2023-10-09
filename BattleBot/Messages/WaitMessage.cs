@@ -12,7 +12,10 @@ public class WaitMessage(long chatId, string text) : IMessage
 	
 	public Task<Message>? Send()
 	{
-		return Program.BotClient.SendTextMessageAsync(ChatId, Text, 
-			replyMarkup: new ForceReplyMarkup {Selective = true});
+		return Program.BotClient.SendTextMessageAsync(ChatId, Text,
+			replyMarkup: new ForceReplyMarkup
+			{
+				Selective = true
+			});
 	}
 }

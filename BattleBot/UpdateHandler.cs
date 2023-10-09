@@ -1,15 +1,12 @@
-using BattleBot.Core;
-using BattleBot.DataBase;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using AppContext = BattleBot.DataBase.AppContext;
 
 namespace BattleBot;
 
-public class UpdateHandler
+public abstract class UpdateHandler
 {
-    public Task Update(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+    public static Task Update(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
         try
         {
@@ -32,26 +29,25 @@ public class UpdateHandler
         return Task.CompletedTask;
     }
 
-    private async void MessageHandler(Update update, CancellationToken cancellationToken)
+    private static async void MessageHandler(Update update, CancellationToken cancellationToken)
     {
         var message = update.Message;
         var user = message?.From;
         var chat = message?.Chat;
         Console.WriteLine($"User [{user?.Username}]: \"{message?.Text}\"");
-                    
-        if (message is not null && chat is not null && user is not null 
-            && message.Text!.StartsWith($"/"))
+
+        if (message is null || chat is null || user is null
+            || !message.Text!.StartsWith($"/")) return;
+
+        switch (message.Text)
         {
-            switch (message.Text)
-            {
-                case "/start":
-                    await Commands.Start(user, chat);
-                    break;
-            }
+            case "/start":
+                await Commands.Start(user, chat);
+                break;
         }
     }
 
-    private async void CallbackQueryHandler(Update update, CancellationToken cancellationToken)
+    private static async void CallbackQueryHandler(Update update, CancellationToken cancellationToken)
     {
         var callbackQuery = update.CallbackQuery;
         var user = callbackQuery?.From;
@@ -59,21 +55,11 @@ public class UpdateHandler
 
         switch (callbackQuery?.Data)
         {
-            case "battleButton":
+            case Buttons.BATTLE:
                 break;
-            case "CreateUnitButton":
-                if (user is not null)
-                {
-                    Unit unit;
-                    unit = await UnitService.Create(user);
-                    var userTelegram = Program.Context.Users
-                        .FirstOrDefault(u => u != null && u.Login == user.Username);
-                    if (userTelegram != null) unit.MasterId = userTelegram.Id;
-                    
-                    Program.Context.Units.Add(unit);
-                    await Program.Context.SaveChangesAsync(cancellationToken);
-                }
-
+            case Buttons.CREATE_UNIT:
+                break;
+            case Buttons.SEE_CHARACTER_INFO:
                 break;
         }
     }

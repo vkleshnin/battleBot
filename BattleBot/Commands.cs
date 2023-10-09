@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using BattleBot.Core;
 using BattleBot.DataBase;
 using BattleBot.Messages;
@@ -10,33 +9,31 @@ public abstract class Commands
 {
 	public static async Task Start(User user, Chat chat)
 	{
-		var userTelegram = Program.Context.Users
-			.FirstOrDefault(u => u != null && u.Login == user.Username);
+		var userTelegram = UserService.Get(user);
 
 		if (userTelegram is null)
 		{
-			Program.Context.Users.Add(UserService.Create(user));
-			await Program.Context.SaveChangesAsync();
+			UserService.Add(user);
 		}
 		else
 		{
 			if (userTelegram.TypeProfile == ETypeProfile.GameMaster)
 			{
 				var message = new MainMessage(chat.Id, ETypeProfile.GameMaster);
-				await message.Send();
+				await message.Send()!;
 			}
 			else
 			{
-				var unit = Program.Context.Units.FirstOrDefault(u => u.MasterId == userTelegram.Id);
+				var unit = UnitService.Get(userTelegram.Id);
 				if (unit is not null)
 				{
 					var message = new MainMessage(chat.Id, ETypeProfile.Default);
-					await message.Send();
+					await message.Send()!;
 				}
 				else
 				{
 					var message = new CreateUnitMessage(chat.Id);
-					await message.Send();
+					await message.Send()!;
 				}
 			}
 		}

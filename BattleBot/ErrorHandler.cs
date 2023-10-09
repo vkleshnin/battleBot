@@ -5,7 +5,7 @@ namespace BattleBot;
 
 public class ErrorHandler
 {
-	public Task Error(ITelegramBotClient botClient, Exception error, CancellationToken cancellationToken)
+	public static Task Error(ITelegramBotClient botClient, Exception error, CancellationToken cancellationToken)
 	{
 		var errorMessage = error switch
 		{

@@ -1,4 +1,3 @@
-using BattleBot.DataBase;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -20,13 +19,13 @@ public class CreateUnitMessage(long chatId) : IMessage
 			{
 				new []
 				{
-					InlineKeyboardButton.WithCallbackData("Создать персонажа.", "CreateUnitButton"),
+					InlineKeyboardButton.WithCallbackData("Создать персонажа.", BattleBot.Buttons.CREATE_UNIT),
 				}
 			});
 	}
 
-	public Task<Message>? Send()
+	public Task<Message> Send()
 	{
-		return Program.BotClient != null ? Program.BotClient.SendTextMessageAsync(ChatId, Text, replyMarkup: Buttons) : null;
+		return Program.BotClient.SendTextMessageAsync(ChatId, Text, replyMarkup: Buttons);
 	}
 }
