@@ -29,6 +29,7 @@
 _UpgradeReport_Files/
 [Pp]ackages/
 Migrations/
+.idea/
 
 Thumbs.db
 Desktop.ini

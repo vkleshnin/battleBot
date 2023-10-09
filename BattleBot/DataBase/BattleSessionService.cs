@@ -1,4 +1,4 @@
-namespace BattleBot.Core.Battle;
+namespace BattleBot.DataBase;
 
 public class BattleSessionService
 {
