@@ -1,3 +1,4 @@
+using BattleBot.DataBase;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -37,14 +38,18 @@ public abstract class UpdateHandler
         Console.WriteLine($"User [{user?.Username}]: \"{message?.Text}\"");
 
         if (message is null || chat is null || user is null
-            || !message.Text!.StartsWith($"/")) return;
+            || !message.Text!.StartsWith("/")) return;
 
+        var messageTelegram = await MessageService.Add(user.Id, message.Text!);
+        
         switch (message.Text)
         {
             case "/start":
                 await Commands.Start(user, chat);
                 break;
         }
+        
+        ChatService.AddMessage(user.Id, messageTelegram);
     }
 
     private static async void CallbackQueryHandler(Update update, CancellationToken cancellationToken)

@@ -8,6 +8,7 @@ namespace BattleBot.DataBase
 		public DbSet<Unit> Units { get; set; } = null!;
 		public DbSet<BattleSession> BattleSessions { get; set; } = null!;
 		public DbSet<ChatTelegram> ChatsTelegram { get; set; } = null!;
+		public DbSet<MessageTelegram> MessagesTelegram { get; set; } = null!;
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 			=> optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=db_battle_log_bot;" +
@@ -28,6 +29,8 @@ namespace BattleBot.DataBase
 		public DateTime EnterDate { get; set; }
 		public DateTime LastDate { get; set; }
 		public ETypeProfile TypeProfile { get; set; }
+		
+		public long TelegramId { get; set; }
 	}
 	
 	public class Unit
@@ -43,21 +46,27 @@ namespace BattleBot.DataBase
 	{
 		public long Id { get; set; }
 		public DateTime StartTime { get; set; }
-		public IEnumerable<long>? Enemies { get; set; }
-		public IEnumerable<long>? Allies { get; set; }
-		public IEnumerable<string>? BattleLog { get; set; }
+		public List<long> Enemies { get; set; } = null!;
+		public List<long> Allies { get; set; } = null!;
+		public List<string> BattleLog { get; set; } = null!;
 	}
 
 	public class ChatTelegram
 	{
-		public UserTelegram User { get; set; } = null!;
-		public IEnumerable<MessageTelegram>? Messages { get; set; }
+		public long Id { get; set; }
+		public long UserId { get; init; }
+		public List<long> Messages { get; init; } = null!;
 	}
 
 	public class MessageTelegram
 	{
-		public DateTime Date { get; set; }
+		public long Id { get; set; }
+
+		public long UserId { get; set; }
+		
 		public string Message { get; set; } = null!;
+
+		public DateTime Date { get; set; }
 	}
 	
 	public enum ETypeProfile

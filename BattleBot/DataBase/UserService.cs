@@ -13,7 +13,8 @@ public abstract class UserService
 			Login = user.Username!,
 			EnterDate = DateTime.UtcNow,
 			LastDate = DateTime.UtcNow,
-			TypeProfile = ETypeProfile.Default
+			TypeProfile = ETypeProfile.Default,
+			TelegramId = user.Id
 		};
 
 		db.Users.Add(userTelegram);
@@ -26,7 +27,7 @@ public abstract class UserService
 	{
 		using var db = new AppContext();
 
-		var telegramUser = db.Users.FirstOrDefault(u => u != null && u.Login == user.Username);
+		var telegramUser = db.Users.FirstOrDefault(u => u.Login == user.Username);
 		
 		if (telegramUser is not null) return telegramUser;
 		
@@ -39,7 +40,7 @@ public abstract class UserService
 	{
 		using var db = new AppContext();
 
-		var telegramUser = db.Users.FirstOrDefault(u => u != null && u.Login == userTelegram.Login);
+		var telegramUser = db.Users.FirstOrDefault(u => u.Login == userTelegram.Login);
 		
 		if (telegramUser is not null) return telegramUser;
 		
@@ -52,12 +53,25 @@ public abstract class UserService
 	{
 		using var db = new AppContext();
 
-		var telegramUser = db.Users.FirstOrDefault(u => u != null && u.Login == userName);
+		var telegramUser = db.Users.FirstOrDefault(u => u.Login == userName);
 		
 		if (telegramUser is not null) return telegramUser;
 		
 		Console.WriteLine($"Console: The user with the login {userName} was not found.");
 		
+		return null;
+	}
+
+	public static UserTelegram? Get(long telegramId)
+	{
+		using var db = new AppContext();
+		
+		var telegramUser = db.Users.FirstOrDefault(u => u.TelegramId == telegramId);
+		
+		if(telegramUser is not null) return telegramUser;
+		
+		Console.WriteLine($"Console: The user with the telegramId {telegramId} was not found.");
+
 		return null;
 	}
 

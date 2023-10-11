@@ -19,7 +19,6 @@ public abstract class UnitService
 
 		db.Units.Add(unit);
 		db.SaveChanges();
-		
 
 		return unit;
 	}
