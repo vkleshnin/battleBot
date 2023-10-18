@@ -33,13 +33,13 @@ public class MainMessage(long chatId, ETypeProfile eTypeProfile) : IMessage
 			{
 				new []
 				{
-					InlineKeyboardButton.WithCallbackData("Персонаж", BattleBot.Buttons.SEE_CHARACTER_INFO), 
+					InlineKeyboardButton.WithCallbackData("Персонаж", BattleBot.Buttons.SEE_USER_UNIT_INFO), 
 				}
 			});
 	}
 
 
-	public Task<Message>? Send()
+	public Task<Message> Send()
 	{
 		return Program.BotClient.SendTextMessageAsync(ChatId, Text, replyMarkup: Buttons);
 	}

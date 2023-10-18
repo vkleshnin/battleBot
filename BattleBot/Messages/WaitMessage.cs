@@ -4,7 +4,7 @@ using Telegram.Bot.Types;
 
 namespace BattleBot.Messages;
 
-public class WaitMessage(long chatId, string text, UserTelegram user) : IMessage
+public class WaitMessage(long chatId, string text, Action<long, string> func) : IMessage
 {
 	private long ChatId { get; set; } = chatId;
 
@@ -12,6 +12,11 @@ public class WaitMessage(long chatId, string text, UserTelegram user) : IMessage
 	
 	public async Task<Message>? Send()
 	{
-		throw new NotImplementedException();
+		if (UpdateHandler.ChatsStates.ContainsKey(chatId))
+			UpdateHandler.ChatsStates[chatId] = ChatState.WaitInput;
+
+		UpdateHandler.MessageReceived += func;
+		
+		return await Program.BotClient.SendTextMessageAsync(ChatId, Text);
 	}
 }

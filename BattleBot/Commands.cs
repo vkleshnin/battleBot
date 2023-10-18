@@ -1,4 +1,3 @@
-using BattleBot.Core;
 using BattleBot.DataBase;
 using BattleBot.Messages;
 using Telegram.Bot.Types;
@@ -9,32 +8,25 @@ public abstract class Commands
 {
 	public static async Task Start(User user, Chat chat)
 	{
-		var userTelegram = UserService.Get(user);
+		var userTelegram = UserService.Get(user) ?? await UserService.Add(user);
 
-		if (userTelegram is null)
+		if (userTelegram.TypeProfile == ETypeProfile.GameMaster)
 		{
-			UserService.Add(user);
+			var message = new MainMessage(chat.Id, ETypeProfile.GameMaster);
+			await message.Send()!;
 		}
 		else
 		{
-			if (userTelegram.TypeProfile == ETypeProfile.GameMaster)
+			var unit = UnitService.Get(userTelegram.TelegramId);
+			if (unit is not null) 
 			{
-				var message = new MainMessage(chat.Id, ETypeProfile.GameMaster);
+				var message = new MainMessage(chat.Id, ETypeProfile.Default);
 				await message.Send()!;
 			}
 			else
 			{
-				var unit = UnitService.Get(userTelegram.Id);
-				if (unit is not null)
-				{
-					var message = new MainMessage(chat.Id, ETypeProfile.Default);
-					await message.Send()!;
-				}
-				else
-				{
-					var message = new CreateUnitMessage(chat.Id);
-					await message.Send()!;
-				}
+				var message = new CreateUnitMessage(chat.Id);
+				await message.Send()!;
 			}
 		}
 	}

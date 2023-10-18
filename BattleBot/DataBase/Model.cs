@@ -4,11 +4,11 @@ namespace BattleBot.DataBase
 {
 	public partial class AppContext : DbContext
 	{
-		public DbSet<UserTelegram> Users { get; set; } = null!;
-		public DbSet<Unit> Units { get; set; } = null!;
-		public DbSet<BattleSession> BattleSessions { get; set; } = null!;
-		public DbSet<ChatTelegram> ChatsTelegram { get; set; } = null!;
-		public DbSet<MessageTelegram> MessagesTelegram { get; set; } = null!;
+		public DbSet<UserTelegram> Users { get; private set; } = null!;
+		public DbSet<Unit> Units { get; private set; } = null!;
+		public DbSet<BattleSession> BattleSessions { get; private set; } = null!;
+		public DbSet<ChatTelegram> ChatsTelegram { get; private set; } = null!;
+		public DbSet<MessageTelegram> MessagesTelegram { get; private set; } = null!;
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 			=> optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=db_battle_log_bot;" +
@@ -29,8 +29,8 @@ namespace BattleBot.DataBase
 		public DateTime EnterDate { get; set; }
 		public DateTime LastDate { get; set; }
 		public ETypeProfile TypeProfile { get; set; }
-		
 		public long TelegramId { get; set; }
+		public List<long> Units { get; set; } = null!;
 	}
 	
 	public class Unit
@@ -61,11 +61,8 @@ namespace BattleBot.DataBase
 	public class MessageTelegram
 	{
 		public long Id { get; set; }
-
 		public long UserId { get; set; }
-		
 		public string Message { get; set; } = null!;
-
 		public DateTime Date { get; set; }
 	}
 	

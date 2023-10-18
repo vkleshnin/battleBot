@@ -4,9 +4,9 @@ namespace BattleBot.DataBase;
 
 public abstract class UserService
 {
-	public static UserTelegram Add(User user)
+	public static async Task<UserTelegram> Add(User user)
 	{
-		using var db = new AppContext();
+		await using var db = new AppContext();
 		
 		var userTelegram = new UserTelegram()
 		{
@@ -14,14 +14,27 @@ public abstract class UserService
 			EnterDate = DateTime.UtcNow,
 			LastDate = DateTime.UtcNow,
 			TypeProfile = ETypeProfile.Default,
-			TelegramId = user.Id
+			TelegramId = user.Id,
+			Units = new List<long>()
 		};
 
 		db.Users.Add(userTelegram);
-		db.SaveChanges();
+		await db.SaveChangesAsync();
 			
 		return userTelegram;
 	}
+	
+	public static Task AddUnit(UserTelegram user, long unitId)
+	{
+		using var db = new AppContext();
+
+		user.Units.Add(unitId);
+		
+		db.Users.Update(user);
+		db.SaveChangesAsync();
+		
+		return Task.CompletedTask;
+	} 
 
 	public static UserTelegram? Get(User user)
 	{
@@ -31,7 +44,7 @@ public abstract class UserService
 		
 		if (telegramUser is not null) return telegramUser;
 		
-		Console.WriteLine($"Console: The user with the login {user.Username} was not found.");
+		Console.WriteLine($"UserService: The user with the login {user.Username} was not found.");
 		
 		return null;
 	}
@@ -44,9 +57,22 @@ public abstract class UserService
 		
 		if (telegramUser is not null) return telegramUser;
 		
-		Console.WriteLine($"Console: The user with the login {userTelegram.Login} was not found.");
+		Console.WriteLine($"UserService: The user with the login {userTelegram.Login} was not found.");
 		
 		return null;
+	}
+
+	public static ETypeProfile GetType(long telegramId)
+	{
+		using var db = new AppContext();
+
+		var telegramUser = db.Users.FirstOrDefault(u => u.TelegramId == telegramId);
+		
+		if (telegramUser is not null) return telegramUser.TypeProfile;
+		
+		Console.WriteLine($"UserService: The user with the telegramId {telegramId} was not found.");
+		
+		return ETypeProfile.Default;
 	}
 	
 	public static UserTelegram? Get(string userName)
@@ -57,7 +83,7 @@ public abstract class UserService
 		
 		if (telegramUser is not null) return telegramUser;
 		
-		Console.WriteLine($"Console: The user with the login {userName} was not found.");
+		Console.WriteLine($"UserService: The user with the login {userName} was not found.");
 		
 		return null;
 	}
@@ -70,8 +96,20 @@ public abstract class UserService
 		
 		if(telegramUser is not null) return telegramUser;
 		
-		Console.WriteLine($"Console: The user with the telegramId {telegramId} was not found.");
+		Console.WriteLine($"UserService: The user with the telegramId {telegramId} was not found.");
 
+		return null;
+	}
+
+	public static List<long>? GetUnits(long userId)
+	{
+		using var db = new AppContext();
+
+		var user = Get(userId);
+		if (user is not null) return user.Units;
+		
+		Console.WriteLine($"UserService: The user with the telegramId {userId} was not found.");
+		
 		return null;
 	}
 
