@@ -8,12 +8,12 @@ namespace BattleBot.Messages;
 public class CreateUnitMessage(long chatId) : IMessage
 {
 	private long ChatId { get; set; } = chatId;
-
 	private string Text { get; set; } = "У вас нет персонажа, чтобы продолжить, создайте персонажа.";
+	private InlineKeyboardMarkup Buttons { get; set;} = CreateButtons();
+	private static string? _returnedText;
+	
 
-	private InlineKeyboardMarkup Buttons { get; set;} = DefaultButtons();
-
-	private static InlineKeyboardMarkup DefaultButtons()
+	private static InlineKeyboardMarkup CreateButtons()
 	{
 		return new InlineKeyboardMarkup(
 			new List<InlineKeyboardButton[]>
@@ -30,69 +30,62 @@ public class CreateUnitMessage(long chatId) : IMessage
 		return Program.BotClient.SendTextMessageAsync(ChatId, Text, replyMarkup: Buttons);
 	}
 	
-	public static async void CreateUnit(long chatId, long userId)
+	public static async Task<Unit> CreateUnit(long chatId, long userId)
 	{
-		Unit unit = new();
+		Unit unit = new() { MasterId = userId };
+    
+		var name = await PromptForString(chatId, "Введите имя: ", 
+			sName => UnitService.Get(sName) is null, "Такое имя уже существует, введите другое: ");    
+		unit.Name = name;
 
-		var messageName = new WaitMessage(chatId, "Введите имя: ", SetName);
+		var levelStr = await PromptForString(chatId, "Введите уровень: ", 
+			sLevel => uint.TryParse(sLevel, out _), "Введите корректный уровень: ");
+		unit.Level = uint.Parse(levelStr);
 
-		await messageName.Send()!;
-		return;
+		var acStr = await PromptForString(chatId, "Введите КБ: ", 
+			sAc => uint.TryParse(sAc, out _), "Введите корректный КБ: ");
+		unit.ArmorClass = uint.Parse(acStr);
 
-		async void SetName(long cIdName, string sName)
+		var hpStr = await PromptForString(chatId, "Введите ХП: ", 
+			sHp => uint.TryParse(sHp, out _), "Введите корректное состояние здоровья: ");
+		unit.HealthPoint = uint.Parse(hpStr);
+    
+		await UnitService.Add(unit);
+
+		await Program.BotClient.SendTextMessageAsync(chatId, "Персонаж создан.");
+
+		var message = new MainMessage(chatId, UserService.GetType(userId));
+		await message.Send();
+    
+		return unit;
+	}
+
+	private static Task<string> PromptForString(long chatId, string prompt, Func<string, bool> validator, string retryPrompt)
+	{
+		var tcs = new TaskCompletionSource<string>();
+
+		_ = SendAndWait();
+
+		return tcs.Task;
+
+		async Task SendAndWait()
 		{
-			UpdateHandler.MessageReceived -= SetName;
-			if (UnitService.Get(sName) is not null)
+			var message = new WaitMessage(chatId, prompt, HandleResponse);
+			await message.Send()!;
+		}
+
+		async void HandleResponse(long cId, string s)
+		{
+			UpdateHandler.MessageReceived -= HandleResponse;
+
+			if (validator(s))
 			{
-				var messageBadName = new WaitMessage(chatId, "Такое имя уже существует, введите другое: ", SetName);
-				await messageBadName.Send()!;
+				tcs.SetResult(s);
 				return;
 			}
-			
-			unit.Name = sName;
-			unit.MasterId = userId;
 
-			var messageLvl = new WaitMessage(chatId, "Введите уровень: ", SetLevel);
-			await messageLvl.Send()!;
-
-			return;
-
-			async void SetLevel(long cIdLevel, string sLevel)
-			{
-				UpdateHandler.MessageReceived -= SetLevel;
-				
-				unit.Level = uint.Parse(sLevel);
-
-				var messageAc = new WaitMessage(chatId, "Введите КБ: ", SetArmorClass);
-				await messageAc.Send()!;
-				
-				return;
-
-				async void SetArmorClass(long cIdArmorClass, string sArmorClass)
-				{
-					UpdateHandler.MessageReceived -= SetArmorClass;
-					
-					unit.ArmorClass = uint.Parse(sArmorClass);
-
-					var messageHp = new WaitMessage(chatId, "Введите ХП: ", SetHealthPoint);
-					await messageHp.Send()!;
-					
-					return;
-
-					async void SetHealthPoint(long cIdHealthPoint, string sHealthPoint)
-					{
-						UpdateHandler.MessageReceived -= SetHealthPoint;
-						
-						unit.HealthPoint = uint.Parse(sHealthPoint);
-						await UnitService.Add(unit);
-
-						await Program.BotClient.SendTextMessageAsync(chatId, "Персонаж создан.");
-						
-						var message = new MainMessage(chatId, UserService.GetType(userId));
-						await message.Send();
-					}
-				}
-			}
+			prompt = retryPrompt;
+			await SendAndWait();
 		}
 	}
 }

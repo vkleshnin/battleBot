@@ -47,11 +47,7 @@ public abstract class UpdateHandler
         
         var messageTelegram = await MessageService.Add(user.Id, message.Text!);
         
-        if (ChatsStates.TryGetValue(chat.Id, out var value) && value == ChatState.WaitInput)
-        {
-            ChatsStates[chat.Id] = ChatState.Default;
-            MessageReceived.Invoke(chat.Id, message.Text!);
-        }
+        CheckMessage(chat.Id, message.Text!);
         
         switch (message.Text)
         {
@@ -76,14 +72,14 @@ public abstract class UpdateHandler
             case Buttons.BATTLE:
                 break;
             case Buttons.CREATE_UNIT:
-                CreateUnitMessage.CreateUnit(chat!.Id, user!.Id);
+                await CreateUnitMessage.CreateUnit(chat!.Id, user!.Id);
                 break;
-            case Buttons.SEE_USER_UNIT_INFO:
+            case Buttons.CHOICE_UNIT_MESSAGE:
                 if (userTelegram is null) 
                     return;
                 
-                var unitInfoMessage = new UnitInfoMessage(chat!.Id, userTelegram.Units[0]);
-                await unitInfoMessage.Send()!;
+                var choiceUnitMessage = new ChoiceUnitMessage(chat!.Id, userTelegram.TelegramId);
+                await choiceUnitMessage.Send()!;
                 break;
             case Buttons.MAIN_MESSAGE:
                 if (userTelegram is null) 
@@ -92,6 +88,41 @@ public abstract class UpdateHandler
                 var mainMessage = new MainMessage(chat!.Id, userTelegram.TypeProfile);
                 await mainMessage.Send();
                 break;
+            default:
+                ChoiceUnitHandler(chat!.Id, callbackQuery!.Data!);
+                break;
+        }
+    }
+    
+    private static void CheckMessage(long chatId, string message)
+    {
+        if (ChatsStates.TryGetValue(chatId, out var value) && value == ChatState.WaitInput)
+        {
+            ChatsStates[chatId] = ChatState.Default;
+            MessageReceived.Invoke(chatId, message);
+        }
+    }
+
+    private static void ChoiceUnitHandler(long chatId, string message)
+    {
+        if (message.StartsWith(Buttons.SEE_UNIT_INFO))
+        {
+            int startSequenceIndex = message.IndexOf(Buttons.SEE_UNIT_INFO, StringComparison.Ordinal);
+            if (startSequenceIndex >= 0)
+            {
+                string unitId = message.Substring(startSequenceIndex + Buttons.SEE_UNIT_INFO.Length);
+                if (unitId.Length == 0)
+                {
+                    Console.WriteLine($"Unit id not found.");
+                    return;
+                }
+                var msg = new SeeUnitInfoMessage(chatId, long.Parse(unitId));
+                msg.Send();
+            }
+            else
+            {
+                Console.WriteLine($"Start sequence {Buttons.SEE_UNIT_INFO} not found.");
+            }
         }
     }
 }

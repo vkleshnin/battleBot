@@ -17,8 +17,7 @@ public abstract class Commands
 		}
 		else
 		{
-			var unit = UnitService.Get(userTelegram.TelegramId);
-			if (unit is not null) 
+			if (userTelegram.Units.Count > 0) 
 			{
 				var message = new MainMessage(chat.Id, ETypeProfile.Default);
 				await message.Send()!;

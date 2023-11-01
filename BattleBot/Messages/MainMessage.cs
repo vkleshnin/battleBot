@@ -11,7 +11,7 @@ public class MainMessage(long chatId, ETypeProfile eTypeProfile) : IMessage
 
 	private string Text { get; set;} = eTypeProfile == ETypeProfile.Default ? "Вы можете только посмотреть своего персонажа, пока ГМ не начал бой и не добавил вас." : ".";
 
-	private InlineKeyboardMarkup Buttons { get; set;} = eTypeProfile == ETypeProfile.Default ? DefaultButtons() : GameMasterButtons();
+	private InlineKeyboardMarkup Buttons { get; set;} = eTypeProfile == ETypeProfile.Default ? ChoiceUnitButtons() : GameMasterButtons();
 
 	private static InlineKeyboardMarkup GameMasterButtons()
 	{
@@ -26,14 +26,14 @@ public class MainMessage(long chatId, ETypeProfile eTypeProfile) : IMessage
 			});
 	}
 	
-	private static InlineKeyboardMarkup DefaultButtons()
+	private static InlineKeyboardMarkup ChoiceUnitButtons()
 	{
 		return new InlineKeyboardMarkup(
 			new List<InlineKeyboardButton[]>
 			{
 				new []
 				{
-					InlineKeyboardButton.WithCallbackData("Персонаж", BattleBot.Buttons.SEE_USER_UNIT_INFO), 
+					InlineKeyboardButton.WithCallbackData("Персонажи", BattleBot.Buttons.CHOICE_UNIT_MESSAGE), 
 				}
 			});
 	}
