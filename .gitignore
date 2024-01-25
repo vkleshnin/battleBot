@@ -30,6 +30,7 @@ _UpgradeReport_Files/
 [Pp]ackages/
 Migrations/
 .idea/
+/BattleBot/AccessTokens.json
 
 Thumbs.db
 Desktop.ini

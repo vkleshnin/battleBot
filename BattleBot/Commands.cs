@@ -9,24 +9,14 @@ public abstract class Commands
 	public static async Task Start(User user, Chat chat)
 	{
 		var userTelegram = UserService.Get(user) ?? await UserService.Add(user);
-
-		if (userTelegram.TypeProfile == ETypeProfile.GameMaster)
+		
+		if (userTelegram.Units.Count > 0 && userTelegram.TypeProfile != ETypeProfile.GameMaster)
 		{
-			var message = new MainMessage(chat.Id, ETypeProfile.GameMaster);
-			await message.Send()!;
+			var createUnitMessage = new CreateUnitMessage(chat.Id);
+			await createUnitMessage.Send();
+			return ;
 		}
-		else
-		{
-			if (userTelegram.Units.Count > 0) 
-			{
-				var message = new MainMessage(chat.Id, ETypeProfile.Default);
-				await message.Send()!;
-			}
-			else
-			{
-				var message = new CreateUnitMessage(chat.Id);
-				await message.Send()!;
-			}
-		}
+		var welcomeMessage = new MainMessage(chat.Id, userTelegram.TypeProfile);
+		await welcomeMessage.Send();
 	}
 }

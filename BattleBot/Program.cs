@@ -10,11 +10,14 @@ public static class Program
 {
 	public static TelegramBotClient BotClient { get; private set; } = null!;
 
-	private const string ACCESS_TOKEN = "6576435744:AAHpfjXc5iebQERrtiBneuuQglfn7MnUl-E";
+	private static string? _accessToken;
 
 	private static async Task Main()
 	{
-		BotClient = new TelegramBotClient(ACCESS_TOKEN);
+		var fileWithToken = await File.ReadAllTextAsync("AccessTokens.json");
+		_accessToken = fileWithToken.Split(':')[1].Split('"')[1];
+		
+		BotClient = new TelegramBotClient(_accessToken);
 		using var cts = new CancellationTokenSource();
 		
 		

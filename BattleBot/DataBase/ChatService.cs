@@ -26,7 +26,6 @@ public class ChatService
 		return chatTelegram;
 	}
 
-	[SuppressMessage("ReSharper.DPA", "DPA0006: Large number of DB commands", MessageId = "count: 3316")]
 	public static ChatTelegram? Get(UserTelegram userTelegram)
 	{
 		using var db = new AppContext();

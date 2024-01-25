@@ -7,8 +7,8 @@ namespace BattleBot.Messages;
 
 public class CreateUnitMessage(long chatId) : IMessage
 {
-	private long ChatId { get; set; } = chatId;
-	private string Text { get; set; } = "У вас нет персонажа, чтобы продолжить, создайте персонажа.";
+	private long ChatId { get; } = chatId;
+	private string Text { get; } = "У вас нет персонажа, чтобы продолжить, создайте персонажа.";
 	private InlineKeyboardMarkup Buttons { get; set;} = CreateButtons();
 	private static string? _returnedText;
 	
